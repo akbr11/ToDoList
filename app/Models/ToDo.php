@@ -17,7 +17,7 @@ class ToDo extends Model
 
         if ($search) {
             foreach ($search as $field => $value) {
-                $query->where($field, $value);
+                $query->where($search);
             }
         }
 

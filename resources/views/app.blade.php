@@ -74,56 +74,65 @@
                 <div class="card">
                     <div class="card-body">
                         <!-- 03. Searching -->
-                        <form id="todo-form" action="" method="get">
+                        <form id="todo-form" action="{{ route('index') }}" method="get">
                             <div class="input-group mb-3">
-                                <input type="text" class="form-control" name="search" value="" 
+                                <input type="text" class="form-control" name="search" value="{{ request('search') }}" 
                                     placeholder="masukkan kata kunci">
                                 <button class="btn btn-secondary" type="submit">
                                     Cari
                                 </button>
                             </div>
                         </form>
-                        @foreach ($data as $d)
-                            <ul class="list-group mb-4" id="todo-list">
-                                <!-- 04. Display Data -->
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span class="task-text">{{ $d->task }}</span>
-                                    <input type="text" class="form-control edit-input" style="display: none;"
-                                        value="{{ $d->task }}">
-                                    <div class="btn-group">
-                                        <button class="btn btn-danger btn-sm delete-btn">✕</button>
-                                        <button class="btn btn-primary btn-sm edit-btn" data-bs-toggle="collapse"
-                                            data-bs-target="#collapse-{{ $loop->index }}" aria-expanded="false">✎</button>
-                                    </div>
-                                </li>
-                                <!-- 05. Update Data -->
-                                <li class="list-group-item collapse" id="collapse-{{ $loop->index }}">
-                                    <form action="" method="POST">
-                                        <div>
-                                            <div class="input-group mb-3">
-                                                <input type="text" class="form-control" name="task"
-                                                    value="{{ $d->task }}">
-                                                <button class="btn btn-outline-primary" type="button">Update</button>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex">
-                                            <div class="radio px-2">
-                                                <label>
-                                                    <input type="radio" value="1" name="is_done"> Selesai
-                                                </label>
-                                            </div>
-                                            <div class="radio">
-                                                <label>
-                                                    <input type="radio" value="0" name="is_done"> Belum
-                                                </label>
-                                            </div>
-                                        </div>
+                        <ul class="list-group mb-4" id="todo-list">
+                            @foreach ($data as $d)
+                            <!-- 04. Display Data -->
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="task-text">
+                                    {!! $d->is_done == '1' ? '<del>' : '' !!}
+                                    {{ $d->task }}
+                                    {!! $d->is_done == '1' ? '</del>' : '' !!}
+                                </span>
+                                <input type="text" class="form-control edit-input" style="display: none;"
+                                    value="{{ $d->task }}">
+                                <div class="btn-group">
+                                    <form action="{{ route('todo.delete', ['id'=> $d->id]) }}" method="POST" onsubmit="return confirm('Are you sure?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-danger btn-sm delete-btn" type="submit">✕</button>
                                     </form>
-                                </li>
-                            </ul>
-                        @endforeach
-                        
-                        
+                                    <button class="btn btn-primary btn-sm edit-btn" data-bs-toggle="collapse"
+                                        data-bs-target="#collapse-{{ $loop->index }}" aria-expanded="false">✎</button>
+                                </div>
+                            </li>
+                            <!-- 05. Update Data -->
+                            <li class="list-group-item collapse" id="collapse-{{ $loop->index }}">
+                                <form action="{{ route('todo.update', ['id'=> $d->id]) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <div>
+                                        <div class="input-group mb-3">
+                                            <input type="text" class="form-control" name="task"
+                                                value="{{ $d->task }}">
+                                            <button class="btn btn-outline-primary" type="submit">Update</button>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex">
+                                        <div class="radio px-2">
+                                            <label>
+                                                <input type="radio" value="1" name="is_done" {{ $d->is_done == '1' ? 'checked' : '' }}> Selesai
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" value="0" name="is_done" {{ $d->is_done == '0' ? 'checked' : '' }}> Belum
+                                            </label>
+                                        </div>
+                                    </div>
+                                </form>
+                            </li>
+                            @endforeach
+                        </ul>
+                        {{ $data->links() }}
                     </div>
                 </div>
             </div>

@@ -13,8 +13,12 @@ class ToDoController extends Controller
      */
     public function index()
     {
-        $toDos = (new ToDo)->search(null);
-        return view('app', ['data' => $toDos]);
+        $max_data = 5;
+        request('search') ?
+            $data = ToDo::where('task', 'like', '%' . request('search') . '%')->get()->paginate($max_data) :
+            $data = ToDo::orderBy('id', 'desc')->paginate($max_data);
+
+        return view('app', compact('data'));
     }
 
     /**
@@ -66,7 +70,20 @@ class ToDoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+
+        $request->validate([
+            "task" => "required|min:3|max:100",
+        ], [
+            "task.required" => "Wajib diisi.",
+            "task.min" => "Minimum 3 karakter.",
+            "task.max" => "Maksimum 100 karakter.",
+        ]);
+        $data = ['task' => $request->task, 'is_done' => $request->is_done];
+        $update = ToDo::where('id', $id)->update($data);
+        if (!$update) {
+            return redirect()->back()->with("error", "Gagal mengubah data.");
+        }
+        return redirect()->back()->with("success", "Data berhasil diubah.");
     }
 
     /**
@@ -74,6 +91,10 @@ class ToDoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $delete = ToDo::where('id', $id)->delete();
+        if (!$delete) {
+            return redirect()->back()->with("error", "Gagal menghapus data.");
+        }
+        return redirect()->back()->with("success", "Data berhasil dihapus.");
     }
 }
